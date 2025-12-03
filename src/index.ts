@@ -1,31 +1,28 @@
-import mongoose from 'mongoose'
+import express, { Application } from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import todoRoutes from './routes/todoRoutes'
 import connectDB from './config/db'
-import {
-  createTodo,
-  deleteTodo,
-  getTodos,
-  updateTodo,
-} from './services/todoService'
 
-const main = async () => {
+dotenv.config()
+
+const app: Application = express()
+const port = process.env.PORT
+
+app.use(cors())
+app.use(express.json())
+app.use('/api/todos', todoRoutes)
+
+const startServer = async () => {
   try {
     await connectDB()
-
-    const up = updateTodo('6930894dfad9d772e47ff631', {
-      title: 'new title',
-      isCompleted: true,
+    app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`)
     })
-
-    console.log(up)
-    const todos = await getTodos()
-    console.log(`All: ${todos}`)
-  } catch (err) {
-    console.error(`An error occured: ${err}`)
-  } finally {
-    await mongoose.disconnect()
-    console.log('Connection closed')
-    process.exit(0)
+  } catch (error) {
+    console.error('Failed to start server: ', error)
+    process.exit(1)
   }
 }
 
-main()
+startServer()
